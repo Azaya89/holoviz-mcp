@@ -96,27 +96,20 @@ Schema
 Below is a simple reference example for data exploration.
 
 ```python
+import hvplot.pandas  # noqa: F401
 # DO import panel if working in .py files
 import panel as pn
-# Do import hvplot.pandas to add .hvplot namespace to Pandas DataFrames and Series
-import hvplot.pandas  # noqa: F401
-
 # DO always run pn.extension() to load panel javascript extensions
 pn.extension()
 
-# Do keep the extraction, transformation and plotting of data clearly separate
-# Extract: earthquakes sample data
 data = hvplot.sampledata.earthquakes('pandas')
 
-# Transform: Group by mag_class and count occurrences
 mag_class_counts = data.groupby('mag_class').size().reset_index(name='counts')
 
-# Plot: counts by mag_class
 plot = mag_class_counts.hvplot.bar(x='mag_class', y='counts', title='Earthquake Counts by Magnitude Class')
 # If working in notebook DO output to plot:
 plot
-# Else if working in .py file DO:
-# DO provide a method to serve the app with `panel serve`
+# Else if working in .py file DO provide a method to serve the app with `panel serve`:
 if pn.state.served:
     # DO remember to add .servable to the panel components you want to serve with the app
     pn.panel(plot, sizing_mode="stretch_both").servable()
@@ -155,7 +148,6 @@ df.hvplot(
 )
 ```
 
-
 | Input | Format String | Output |
 | - |  - | - |
 | 1230974 | '0.0a' | 1.2m |
@@ -188,11 +180,9 @@ import panel as pn
 
 apple = hvplot.sampledata.apple_stocks('pandas').set_index('date')
 
-# Create a line plot of closing price
 plot = apple.hvplot.line(y='close', grid=True,
                          title='Apple Close Price', ylabel='Close Price (USD)')
 
-# Create a Panel app
 app = pn.Column("# Apple Stock Close Price", plot)
 
 if pn.state.served:
@@ -200,7 +190,7 @@ if pn.state.served:
 ```
 
 ```bash
-panel serve plot.py --dev
+panel serve plot.py --dev --show
 ```
 
 ### Recommended Plot Types
@@ -209,18 +199,13 @@ panel serve plot.py --dev
 |---|---|
 | `line` | Time series and continuous data |
 | `scatter` | Relationships between variables; `c=` column for color encoding |
+|`points` | Independent variables in two-dimensional space |
 | `bar` | Categorical comparisons; `stacked=True` for stacked bars |
 | `area` | Filled/stacked series; `y2=` for min/max spread bands |
-| `step` | Discrete step-changes; `where='pre'/'mid'/'post'` |
 | `hist` | Distributions; `bin_range=`, `by=` for grouped histograms |
 | `kde` / `density` | Smooth distribution estimate; overlay multiple columns with `alpha=` |
 | `box` | Summary statistics by category; `invert=True` for horizontal |
 | `violin` | Richer distribution view than box; `by=` grouping |
-| `hexbin` | Dense scatter data; `logz=True` for log color scale |
-| `bivariate` | 2D density contours as a cleaner alternative to dense scatter |
-| `heatmap` | Value aggregation across two categorical dims; `C=`, `reduce_function=np.mean` |
-| `table` | Interactive sortable data table; `columns=` to select a subset |
-| `labels` | Text annotations on a plot; auto-configured when only two columns are provided |
 
 - For distribution plots (`hist`, `kde`, `box`, `violin`), specify `y` column(s) — no `x` needed.
 
@@ -374,7 +359,7 @@ earthquakes.hvplot.points('lon', 'lat',
 earthquakes.hvplot.points('lon', 'lat', geo=True, features=['coastline', 'borders'])
 ```
 
-For raster/xarray geo data, prefer `quadmesh` over `image` for non-rectangular projections. Use `hvplot.sampledata.air_temperature('xarray')` for a ready-made example dataset:
+For raster/xarray geo data, prefer `quadmesh` over `image` for non-rectangular projections.
 
 ```python
 import hvplot.xarray  # noqa
@@ -402,9 +387,6 @@ stocks = hvplot.sampledata.stocks('pandas').set_index('date')
 # Custom datetime tick formatting on x-axis
 apple.hvplot.line(y='close', xformatter=DatetimeTickFormatter(months='%b %Y'))
 
-# Auto-scale y-axis to visible data on zoom/pan
-apple.hvplot.line(y='close', autorange='y')
-
 # Stacked multi-stock view: each series gets its own y sub-axis
 stocks.hvplot.line(y=['Apple', 'Amazon', 'Google', 'Meta'], subcoordinate_y=True)
 
@@ -412,10 +394,6 @@ stocks.hvplot.line(y=['Apple', 'Amazon', 'Google', 'Meta'], subcoordinate_y=True
 # Works on Pandas datetime index: 'index.month', 'index.hour', 'index.year', etc.
 apple.hvplot.heatmap(x='index.hour', y='index.month', C='close', cmap='reds', reduce_function=np.mean)
 apple.hvplot.violin(by='index.month')
-
-# Groupby with scrubber widget (animation-style navigation)
-apple.hvplot(y='close', groupby=['index.year', 'index.month'],
-             widget_type='scrubber', widget_location='bottom')
 ```
 
 ## Statistical Module Functions
@@ -443,8 +421,6 @@ hvplot.andrews_curves(penguins, 'species')
 # Lag plot — detect autocorrelation and volatility in time series
 hvplot.lag_plot(apple[['close']], lag=5, alpha=0.3)
 ```
-
-All four support Bokeh's linked zoom, pan, and brushing interactivity.
 
 ## Saving and Displaying
 
