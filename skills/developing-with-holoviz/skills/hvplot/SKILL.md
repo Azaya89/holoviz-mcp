@@ -36,60 +36,10 @@ Optional dependencies from the HoloViz Ecosystem:
 ## Installation for Development
 
 ```bash
-pip install hvplot hvsampledata panel watchfiles
+pip install hvplot panel watchfiles
 ```
 
 For development in .py files DO always include watchfiles for Panel hotreload.
-
-## Earthquake Sample Data
-
-In the example below we will use the `earthquakes` sample data:
-
-```python
-import hvplot.pandas  # noqa
-
-hvplot.sampledata.earthquakes('pandas')
-```
-
-```text
-Tabular record of earthquake events from the USGS Earthquake Catalog that provides detailed
-information including parameters such as time, location as latitude/longitude coordinates
-and place name, depth, and magnitude. The dataset contains 596 events.
-
-Note: The columns `depth_class` and `mag_class` were created by categorizing numerical values from
-the `depth` and `mag` columns in the original dataset using custom-defined binning:
-
-Depth Classification
-
-| depth     | depth_class  |
-|-----------|--------------|
-| Below 70  | Shallow      |
-| 70 - 300  | Intermediate |
-| Above 300 | Deep         |
-
-Magnitude Classification
-
-| mag         | mag_class |
-|-------------|-----------|
-| 3.9 - <4.9  | Light     |
-| 4.9 - <5.9  | Moderate  |
-| 5.9 - <6.9  | Strong    |
-| 6.9 - <7.9  | Major     |
-
-
-Schema
-------
-| name        | type       | description                                                         |
-|:------------|:-----------|:--------------------------------------------------------------------|
-| time        | datetime   | UTC Time when the event occurred.                                   |
-| lat         | float      | Decimal degrees latitude. Negative values for southern latitudes.   |
-| lon         | float      | Decimal degrees longitude. Negative values for western longitudes   |
-| depth       | float      | Depth of the event in kilometers.                                   |
-| depth_class | category   | The depth category derived from the depth column.                   |
-| mag         | float      | The magnitude for the event.                                        |
-| mag_class   | category   | The magnitude category derived from the mag column.                 |
-| place       | string     | Textual description of named geographic region near to the event.   |
-```
 
 ## Reference Data Exploration Example
 
@@ -199,7 +149,7 @@ panel serve plot.py --dev --show
 |---|---|
 | `line` | Time series and continuous data |
 | `scatter` | Relationships between variables; `c=` column for color encoding |
-|`points` | Independent variables in two-dimensional space |
+| `points` | Independent variables in two-dimensional space |
 | `bar` | Categorical comparisons; `stacked=True` for stacked bars |
 | `area` | Filled/stacked series; `y2=` for min/max spread bands |
 | `hist` | Distributions; `bin_range=`, `by=` for grouped histograms |
@@ -209,57 +159,7 @@ panel serve plot.py --dev --show
 
 - For distribution plots (`hist`, `kde`, `box`, `violin`), specify `y` column(s) — no `x` needed.
 
-## Grouping: `by` vs `groupby`
-
-These two parameters look similar but behave very differently:
-
-- **`by=`** — splits data into one element per group, all **overlaid on the same axes**
-- **`groupby=`** — creates an **interactive Panel widget** (selector or slider) to filter the plot
-
-```python
-import hvplot.pandas  # noqa
-
-penguins = hvplot.sampledata.penguins('pandas')
-
-# by= → one scatter series per species, all shown simultaneously
-penguins.hvplot.scatter(x='bill_length_mm', y='bill_depth_mm', by='species', alpha=0.5)
-
-# groupby= → a dropdown selector to view one island at a time
-penguins.hvplot.violin(y='bill_length_mm', by='species', groupby='island')
-```
-
-Widget type is auto-chosen from dtype (string → `Select`, numeric → slider). Override it:
-
-```python
-import panel as pn
-
-penguins.hvplot.scatter(
-    x='bill_length_mm', y='bill_depth_mm',
-    groupby='species',
-    widgets={'species': pn.widgets.DiscreteSlider},  # override widget class
-    widget_location='bottom',                         # 'left', 'right', 'top', 'bottom'
-)
-```
-
-Pass Panel widgets directly as plot arguments for fully reactive plots:
-
-```python
-x    = pn.widgets.Select(name='x',    options=['bill_length_mm', 'flipper_length_mm'])
-y    = pn.widgets.Select(name='y',    options=['bill_depth_mm',  'body_mass_g'])
-kind = pn.widgets.Select(name='kind', value='scatter', options=['scatter', 'bivariate'])
-
-plot = penguins.hvplot(x=x, y=y, kind=kind, width=500)
-pn.Row(pn.WidgetBox(x, y, kind), plot)
-```
-
 ## Subplots and Layouts
-
-Combine plots with HoloViews operators:
-
-```python
-plot_a * plot_b   # overlay: both on the same axes
-plot_a + plot_b   # layout: side by side
-```
 
 Use `subplots=True` to give each `y` column its own panel. Axes are linked by default:
 
@@ -421,27 +321,6 @@ hvplot.andrews_curves(penguins, 'species')
 # Lag plot — detect autocorrelation and volatility in time series
 hvplot.lag_plot(apple[['close']], lag=5, alpha=0.3)
 ```
-
-## Saving and Displaying
-
-```python
-import hvplot
-
-# Open in browser (launches a Bokeh server)
-hvplot.show(plot)
-
-# Save as interactive HTML (loads BokehJS from CDN — small file, requires internet)
-hvplot.save(plot, 'chart.html')
-
-# Save as self-contained HTML (no internet required; larger file)
-from bokeh.resources import INLINE
-hvplot.save(plot, 'chart.html', resources=INLINE)
-
-# Save as PNG (requires Selenium)
-hvplot.save(plot, 'chart.png')
-```
-
-For a quick browser PNG, use the Bokeh toolbar's built-in save button instead.
 
 ## Workflows
 
